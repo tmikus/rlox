@@ -22,6 +22,26 @@ impl Token {
 
 impl fmt::Display for Token {
   fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-    write!(formatter, "{:?} {} {:?}", self.token_type, self.lexeme, self.literal)
+    match self.literal {
+      Some(ref value) => {
+        if let Some(string) = value.downcast_ref::<String>() {
+          format_value(formatter, &self.token_type, &self.lexeme, string)
+        } else if let Some(double) = value.downcast_ref::<f64>() {
+          format_value(formatter, &self.token_type, &self.lexeme, double)
+        } else {
+          format_value(formatter, &self.token_type, &self.lexeme, "None")
+        }
+      },
+      None => format_value(formatter, &self.token_type, &self.lexeme, "None")
+    }
   }
+}
+
+fn format_value<T: fmt::Display>(
+  formatter: &mut fmt::Formatter,
+  token_type: &TokenType,
+  lexeme: &String,
+  value: T,
+) -> fmt::Result {
+  write!(formatter, "{:?} {} {}", token_type, lexeme, value)
 }
